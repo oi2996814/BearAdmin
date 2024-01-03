@@ -217,11 +217,13 @@ class GenerateController extends AdminBaseController
         $data   = [];
         try {
 
+            $param['field_default'] = '';
+
             if ($param['form_type'] === 'switch') {
                 $param['form_type'] = 'switch_field';
+                // 此处默认为1，可自行修改
+                $param['field_default'] = '1';
             }
-
-            $param['field_default'] = '';
 
             $class_name = parse_name($param['form_type'], 1);
 
@@ -302,6 +304,28 @@ class GenerateController extends AdminBaseController
             }
         }
 
+        return admin_success('', [
+            'name' => $name,
+        ]);
+    }
+
+    /**
+     * 获取关联显示字段
+     * @param Request $request
+     * @return Json
+     */
+    public function getRelationTable(Request $request): Json
+    {
+        $param = $request->param();
+        $field = $param['field'];
+        $name  = '';
+        if (strrchr($field, '_id') === '_id') {
+            $table      = str_replace('_id', '', $field);
+            $table_info = Db::query('SHOW TABLE STATUS LIKE ' . "'" . $table . "'");
+            if ($table_info) {
+                $name = $table;
+            }
+        }
         return admin_success('', [
             'name' => $name,
         ]);
